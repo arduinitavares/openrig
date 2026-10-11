@@ -37,8 +37,11 @@ describe.skipIf(process.platform === "win32")("parent-session cleanup with an af
 
       // The hook did bring the owner's window in, and made it the seat session's current window.
       expect(await tmux("display-message", "-p", "-t", "=seat:", "#{pane_id}")).toBe(ownerPane);
-      // The owner's pane was not restarted.
-      expect(await tmux("list-panes", "-t", "owner:0", "-F", "#{pane_id} #{pane_pid} #{pane_current_command}")).toBe(`${ownerPane} ${ownerPid} sleep`);
+      // The owner's pane was not restarted: same pane, same process, still running. (Not the command
+      // name: a default shell that doesn't exec its last command, such as dash, stays the pane's
+      // process, so pane_current_command reads `dash`, not `sleep`.)
+      expect(await tmux("list-panes", "-t", "owner:0", "-F", "#{pane_id} #{pane_pid} #{pane_dead}")).toBe(`${ownerPane} ${ownerPid} 0`);
+      expect(() => process.kill(Number(ownerPid), 0)).not.toThrow();
       // The seat's own pane was restarted without the parent identity.
       const seatPanes = (await tmux("list-panes", "-s", "-t", "=seat", "-F", "#{pane_id} #{pane_pid}")).split("\n").map(line => line.split(" "));
       const own = seatPanes.filter(([id]) => id !== ownerPane);
