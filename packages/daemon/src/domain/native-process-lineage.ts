@@ -643,7 +643,15 @@ export async function observeClaudeDelivery(
         const fingerprint = native.fingerprint;
         const identities = chain.map((link) => claudeSessionIdentity(tokens(link.process.command).slice(1)));
         const named = new Set(identities.filter((value): value is string => typeof value === "string"));
-        if (named.size > 1) return { state: "conflict", detail: "Claude processes in the bound foreground name different conversations", fingerprint };
+        if (named.size > 1) {
+          // A Claude can start a fork of its own conversation, and ancestry in one foreground group doesn't show which
+          // of them receives input. When only a --fork-session link names the second conversation, keep the warn-and-send
+          // that held before forks were read, without verifying either.
+          const unforked = new Set(identities.filter((value, index): value is string =>
+            typeof value === "string" && !tokens(chain[index]!.process.command).includes("--fork-session")));
+          if (unforked.size <= 1) return { state: "unknown", detail: "A Claude process and a fork of a conversation share the bound foreground; current conversation is unverified", fingerprint };
+          return { state: "conflict", detail: "Claude processes in the bound foreground name different conversations", fingerprint };
+        }
         if (!input.expectedToken) return { ...unknown, fingerprint };
         // argv records launch identity, not the current conversation: /clear can
         // rotate the hook-persisted token without replacing this process. A sole

@@ -437,4 +437,23 @@ describe("Claude exact-resume finder behind a spawning launcher", () => {
   it("leaves a --fork-session child that names only its parent as on main", () => {
     expect(find(scriptRows(`claude --resume ${token} --fork-session`))).toBe(11);
   });
+  const forkChild = `claude --resume ${token} --fork-session --session-id ${other} --name dev@rig`;
+  it("refuses a script launcher's token over its Claude fork child naming the fork's own id", () => {
+    expect(find(scriptRows(forkChild))).toBeNull();
+  });
+  it("keeps a real Claude's proof when it starts a fork of its conversation", () => {
+    expect(find(realRows(forkChild))).toBe(11);
+  });
+  const delivery = (rows: NativeProcessRow[], expectedToken: string) => observeClaudeDelivery({
+    target: "%1", tmux: { getPanePid: async () => 10 }, listProcesses: async () => rows, expectedToken,
+  });
+  it.each([["the parent's", token], ["the fork's", other]])(
+    "delivery to a Claude with its fork in the foreground warns and sends with %s token stored, verifying neither", async (_label, stored) => {
+      const observed = await delivery(realRows(forkChild), stored);
+      expect(observed.state).toBe("unknown");
+      expect(observed.detail).toContain("fork");
+    });
+  it("delivery still reports a conflict when two Claude processes name different conversations without a fork", async () => {
+    expect((await delivery(realRows(`claude --session-id ${other} --name dev@rig`), token)).state).toBe("conflict");
+  });
 });
