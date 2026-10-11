@@ -1,0 +1,12 @@
+{
+  "name": "OpenRig source development",
+  "dockerComposeFile": "compose.yaml",
+  "service": "openrig",
+  "workspaceFolder": "/workspace/repos/openrig",
+  "remoteUser": "node",
+  "updateRemoteUserUID": false,
+  "overrideCommand": false,
+  "shutdownAction": "stopCompose",
+  "initializeCommand": ["bash", "${localWorkspaceFolder}/.devcontainer/check-home.sh"],
+  "postCreateCommand": "bash .devcontainer/setup.sh"
+}
