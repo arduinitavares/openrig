@@ -151,16 +151,16 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
       (e) => e.category === "runtime_resource" && e.resourceType === "claude_activity_hooks",
     );
     let activityOutcome: ActivityHookOutcome = { changed: false, delivered: false, sourceMissing: false, manifestUnavailable: false, settingsUnparseable: false };
-    // A binding without a cwd (startup bootstraps the stored node's selection) keeps the guarded reconcile below.
-    if (binding.cwd && isFilesystemRoot(binding.cwd)) {
-      console.error(`[openrig] claude activity hooks skipped: cwd '${binding.cwd}' resolves to the filesystem root, not a project workspace`);
-    } else {
-      try {
-        activityOutcome = this.reconcileClaudeActivityHooks(binding.cwd, activityEntries.length > 0);
-      } catch (err) {
-        console.error(`[openrig] claude activity-hook reconcile warning: ${(err as Error).message}`);
-        activityOutcome = { changed: false, delivered: false, sourceMissing: false, manifestUnavailable: false, settingsUnparseable: false };
-      }
+    try {
+      activityOutcome = this.reconcileClaudeActivityHooks(binding.cwd, activityEntries.length > 0);
+    } catch (err) {
+      // #226: delivery at '/' is still attempted (it works where '/' is writable); when it fails there, say why.
+      // A binding without a cwd (startup bootstraps the stored node's selection) gets the plain warning.
+      const atRoot = binding.cwd && isFilesystemRoot(binding.cwd)
+        ? ` (cwd '${binding.cwd}' resolves to the filesystem root, not a project workspace)`
+        : "";
+      console.error(`[openrig] claude activity-hook reconcile warning${atRoot}: ${(err as Error).message}`);
+      activityOutcome = { changed: false, delivered: false, sourceMissing: false, manifestUnavailable: false, settingsUnparseable: false };
     }
     // Never claim a resource as PROJECTED when delivery could not happen (missing
     // relay source or a fail-closed malformed settings file): demote to skipped so
