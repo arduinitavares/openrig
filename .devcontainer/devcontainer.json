@@ -1,12 +1,33 @@
 {
   "name": "OpenRig source development",
-  "dockerComposeFile": "compose.yaml",
-  "service": "openrig",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "CODEX_VERSION": "0.162.1"
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/repos/openrig,type=bind",
   "workspaceFolder": "/workspace/repos/openrig",
+  "mounts": [
+    "source=openrig-source-dev_node_modules,target=/workspace/repos/openrig/node_modules,type=volume",
+    "source=openrig-source-dev_ui_node_modules,target=/workspace/repos/openrig/packages/ui/node_modules,type=volume",
+    "source=openrig-docker_home,target=/home/node,type=volume"
+  ],
+  "containerEnv": {
+    "HOME": "/home/node",
+    "CODEX_HOME": "/home/node/.codex",
+    "OPENRIG_HOME": "/home/node/.openrig"
+  },
   "remoteUser": "node",
   "updateRemoteUserUID": false,
+  "init": true,
   "overrideCommand": false,
-  "shutdownAction": "stopCompose",
-  "initializeCommand": ["bash", "${localWorkspaceFolder}/.devcontainer/check-home.sh"],
+  "shutdownAction": "stopContainer",
+  "initializeCommand": [
+    "bash",
+    "${localWorkspaceFolder}/.devcontainer/check-home.sh",
+    "${localWorkspaceFolder}"
+  ],
   "postCreateCommand": "bash .devcontainer/setup.sh"
 }

@@ -2,14 +2,16 @@
 set -euo pipefail
 
 # VS Code runs this on the Mac before opening the Dev Container.
-# Existing home data must be present, and another container must not use it.
+# Preserve existing data and reject another environment using this home.
+workspace=${1:?Expected the Mac checkout path}
+config_file="$workspace/.devcontainer/devcontainer.json"
 docker volume inspect openrig-docker_home >/dev/null
 containers=$(docker ps --filter volume=openrig-docker_home \
-    --format '{{.Names}}\t{{.Label "com.docker.compose.project"}}\t{{.Label "com.docker.compose.service"}}')
+    --format '{{.Names}}\t{{.Label "devcontainer.local_folder"}}\t{{.Label "devcontainer.config_file"}}')
 
 if [[ -n "$containers" ]]; then
-    while IFS=$'\t' read -r name project service; do
-        if [[ "$project" != openrig-source-dev || "$service" != openrig ]]; then
+    while IFS=$'\t' read -r name folder config; do
+        if [[ "$folder" != "$workspace" || "$config" != "$config_file" ]]; then
             printf 'The retained home is currently used by %s.\n' "$name" >&2
             printf '%s\n' 'Stop that container before reopening this checkout. Keep its volumes.' >&2
             exit 1
