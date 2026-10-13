@@ -14,6 +14,8 @@ pods:
       - id: lead
         agent_ref: "local:agents/advisor/lead"
         runtime: codex
+        model: gpt-6.1-sol
+        effort: max
         profile: default
         cwd: "."
 
@@ -35,6 +37,8 @@ pods:
       - id: agent
         agent_ref: "local:agents/operator/agent"
         runtime: codex
+        model: gpt-6.1-sol
+        effort: max
         profile: default
         cwd: "."
     edges:
@@ -51,6 +55,8 @@ pods:
       - id: worker
         agent_ref: "local:agents/queue/worker"
         runtime: codex
+        model: gpt-6.1-sol
+        effort: max
         profile: default
         cwd: "."
 

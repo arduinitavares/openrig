@@ -12,7 +12,8 @@
   "mounts": [
     "source=openrig-source-dev_node_modules,target=/workspace/repos/openrig/node_modules,type=volume",
     "source=openrig-source-dev_ui_node_modules,target=/workspace/repos/openrig/packages/ui/node_modules,type=volume",
-    "source=openrig-docker_home,target=/home/node,type=volume"
+    "source=openrig-docker_home,target=/home/node,type=volume",
+    "source=/Users/aaat/projects/adaptive-planning,target=/workspace/repos/adaptive-planning,type=bind"
   ],
   "containerEnv": {
     "HOME": "/home/node",

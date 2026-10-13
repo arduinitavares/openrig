@@ -1,7 +1,7 @@
 version: "0.2"
 name: starter
 summary: >
-  A Claude Code builder and a Codex reviewer in your repository. Give the builder one bounded change; follow the durable result and
+  A Codex Sol 6.1 Ultra builder and an OMP Claude Opus 5.5 Medium reviewer in your repository. Give the builder one bounded change; follow the durable result and
   continue at the same address. See docs/reference/getting-started.md.
 
 culture_file: CULTURE.md
@@ -12,7 +12,9 @@ pods:
     members:
       - id: build
         agent_ref: "local:../../../agents/development/implementer"
-        runtime: claude-code
+        runtime: codex
+        model: gpt-6.1-sol
+        effort: ultra
         profile: default
         cwd: "."
         startup:
@@ -22,8 +24,8 @@ pods:
               required: true
       - id: review
         agent_ref: "local:../../../agents/development/qa"
-        runtime: codex
-        model: gpt-6-astra
+        runtime: omp
+        model: "google-antigravity/claude-opus-5-5:medium"
         profile: default
         cwd: "."
     edges:
