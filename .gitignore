@@ -45,3 +45,7 @@ packages/daemon/context-packs/
 
 # Internal build receipts; never commit
 /.evidence/
+
+# Local analysis and backup files
+/.ua/
+/packages/daemon/specs/rigs/launch/starter/rig copy.yaml
